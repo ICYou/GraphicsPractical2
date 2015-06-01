@@ -33,6 +33,7 @@ struct VertexShaderOutput
 {
 	float4 Position2D : POSITION0;
 	float4 Normal : TEXCOORD0;
+	float2 Coordinate : TEXCOORD1;
 };
 
 //------------------------------------------ Functions ------------------------------------------
@@ -44,9 +45,38 @@ float4 NormalColor(VertexShaderOutput input)
 }
 
 // Implement the Procedural texturing assignment here
-float4 ProceduralColor(/* parameter(s) */)
+float4 ProceduralColor(VertexShaderOutput input)
 {
-	return float4(0, 0, 0, 1);
+	// Set scalar for checkers
+	int scalar = 5;
+	
+			// Implicit casting from (float) to (int)
+	int posX = abs(input.Coordinate.x * scalar) % 2;
+		int posY = abs(input.Coordinate.y * scalar) % 2;
+	
+			// Toggle between signs being both equal or not
+	if (sign(input.Coordinate.x) == sign(input.Coordinate.y)) {
+		if (posX == posY) {
+			return float4(-input.Normal.x, -input.Normal.y, -input.Normal.z, 1);
+			
+		}
+		else {
+			return float4(input.Normal.x, input.Normal.y, input.Normal.z, 1);
+			
+		}
+		
+	}
+	else {
+		if (posX == posY) {
+			return float4(input.Normal.x, input.Normal.y, input.Normal.z, 1);
+			
+		}
+		else {
+			return float4(-input.Normal.x, -input.Normal.y, -input.Normal.z, 1);
+			
+		}
+		
+	}
 }
 
 //---------------------------------------- Technique: Simple ----------------------------------------
@@ -62,13 +92,16 @@ VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
 	output.Position2D    = mul(viewPosition, Projection);
 	//1.1 Coloring using normals (add normal values to the output, so it can be used for coloring)
 	output.Normal = input.Normal3D;
+	// Assign 3D coordinates for procedural texture rendering
+	output.Coordinate = input.Position3D.xy;
 
 	return output;
 }
 
 float4 SimplePixelShader(VertexShaderOutput input) : COLOR0
 {
-	float4 color = NormalColor(input);
+	//float4 color = NormalColor(input);
+	float4 color = ProceduralColor(input);
 	return color;
 }
 
