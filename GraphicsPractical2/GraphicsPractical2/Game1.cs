@@ -71,10 +71,12 @@ namespace GraphicsPractical2
             this.model = this.Content.Load<Model>("Models/Teapot");
             this.model.Meshes[0].MeshParts[0].Effect = effect;
 
-            // Set Diffuse- & ambientcolor, ambient intensity and light direction
+            // Set Diffuse- & ambientcolor, ambient intensity, light direction, and specular color and intensity
             this.modelMaterial.DiffuseColor = Color.Red;
             this.modelMaterial.AmbientColor = Color.Red;
             this.modelMaterial.AmbientIntensity = 0.2f;
+            this.modelMaterial.SpecularColor = Color.White;
+            this.modelMaterial.SpecularIntensity = 25.2f;
             this.light = new Vector4(-1, -1, -1, 0);
 
             // Setup the quad
@@ -128,14 +130,19 @@ namespace GraphicsPractical2
             ModelMesh mesh = this.model.Meshes[0];
             Effect effect = mesh.Effects[0];
 
-            // Set the effect parameters, Color, LightSource and Ambient
+            // Set the effect parameters, Color, LightSource, Ambient and specular
             effect.Parameters["Color"].SetValue(modelMaterial.DiffuseColor.ToVector4());
             effect.Parameters["LightDirection"].SetValue(light);
             effect.Parameters["AmbientColor"].SetValue(modelMaterial.AmbientColor.ToVector4());
             effect.Parameters["AmbientIntensity"].SetValue(modelMaterial.AmbientIntensity);
+            effect.Parameters["SpecularColor"].SetValue(modelMaterial.SpecularColor.ToVector4());
+            effect.Parameters["SpecularPower"].SetValue(modelMaterial.SpecularPower);
+            effect.Parameters["SpecularIntensity"].SetValue(modelMaterial.SpecularIntensity);
+            effect.Parameters["View"].SetValue(camera.ViewMatrix);
             effect.CurrentTechnique = effect.Techniques["Simple"];
             // Matrices for 3D perspective projection
             this.camera.SetEffectParameters(effect);
+            effect.Parameters["World"].SetValue(Matrix.Identity);
             effect.Parameters["World"].SetValue(Matrix.CreateScale(10.0f));
             // Draw the model
             mesh.Draw();

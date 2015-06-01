@@ -8,8 +8,9 @@
 
 // Matrices for 3D perspective projection 
 float4x4 View, Projection, World;
-float4 Color, LightDirection, AmbientColor;
-float AmbientIntensity;
+float4 Color, LightDirection, AmbientColor, SpecularColor;
+float AmbientIntensity, SpecularIntensity, SpecularPower;
+float3 CameraPosition;
 
 
 //---------------------------------- Input / Output structures ----------------------------------
@@ -37,6 +38,7 @@ struct VertexShaderOutput
 	float4 Position2D : POSITION0;
 	float4 Normal : TEXCOORD0;
 	float2 Coordinate : TEXCOORD1;
+	float4 Position3D : TEXCOORD2;
 };
 
 //------------------------------------------ Functions ------------------------------------------
@@ -89,6 +91,22 @@ float4 LambertianLighting(VertexShaderOutput input)
 		return lamb + ambColor;
 }
 
+// PhongLighting implementation
+float4 PhongLighting(VertexShaderOutput input)
+{
+
+	float3x3 rotationAndScale = (float3x3) World;
+		//lambertian calculation
+		float4 lamb = Color * saturate(dot(normalize(mul(input.Normal, rotationAndScale)), normalize((-1) * normalize(LightDirection))));
+		//ambientcolor calculation
+		float4 ambColor = AmbientColor * AmbientIntensity;
+		//specular calculation
+		float4 viewVector = mul(CameraPosition, World);
+		float4 halfvector = normalize((-1) * normalize(LightDirection) + normalize(mul(input.Position3D, World) - normalize(viewVector)));
+		float4 specColor = SpecularColor * (SpecularIntensity * pow(saturate(dot(halfvector, input.Normal)), SpecularPower));
+		return lamb + ambColor + specColor;
+}
+
 //---------------------------------------- Technique: Simple ----------------------------------------
 
 VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
@@ -104,6 +122,8 @@ VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
 	output.Normal = input.Normal3D;
 	//1.2 Checkerboard pattern (add pixel coordinates)
 	output.Coordinate = input.Position3D.xy;
+	//2.3
+	output.Position3D = mul(input.Position3D, World);
 
 	return output;
 }
@@ -112,7 +132,8 @@ float4 SimplePixelShader(VertexShaderOutput input) : COLOR0
 {
 	//float4 color = NormalColor(input);
 	//float4 color = ProceduralColor(input);
-	float4 color = LambertianLighting(input);
+	//float4 color = LambertianLighting(input);
+	float4 color = PhongLighting(input);
 	return color;
 }
 
