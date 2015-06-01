@@ -49,9 +49,16 @@ float4 ProceduralColor(VertexShaderOutput input)
 {
 	// Set scalar for checkers
 	int scalar = 5;
+	float X = input.Coordinate.x;
+	float Y = input.Coordinate.y;
 	
-	bool x = (int)(input.Coordinate.x*scalar) % 2;
-	bool y = (int)(input.Coordinate.y*scalar) % 2;	
+	if (X < 0)
+		X--;
+	if (Y < 0)
+		Y--;
+
+	bool x = sign((int)(X * scalar) % 2);
+	bool y = sign((int)(Y * scalar) % 2);	
 
 	bool test = x != y;
 
