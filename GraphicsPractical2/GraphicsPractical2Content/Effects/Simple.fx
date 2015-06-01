@@ -5,7 +5,10 @@
 //------------------------------------- Top Level Variables -------------------------------------
 
 // Top level variables can and have to be set at runtime
-
+float4 Color;
+float3 LightSource;
+float4 AmbientColor;
+float AmbientIntensity;
 // Matrices for 3D perspective projection 
 float4x4 View, Projection, World;
 
@@ -57,8 +60,8 @@ float4 ProceduralColor(VertexShaderOutput input)
 	if (Y < 0)
 		Y--;
 
-	bool x = sign((int)(X * checkerSize) % 2);
-	bool y = sign((int)(Y * checkerSize) % 2);	
+	bool x = (int)(X * checkerSize) % 2;
+	bool y = (int)(Y * checkerSize) % 2;	
 
 	bool test = x != y;
 
@@ -72,9 +75,19 @@ float4 ProceduralColor(VertexShaderOutput input)
 	}
 }
 
+float4 LambertianLighting(VertexShaderInput input){
+
+	return float4(1, 0, 0, 1);
+}
+
+float4 AmbientShading(VertexShaderInput input)
+{
+	return LambertianLighting(input) + AmbientColor * AmbientIntensity;
+}
+
 //---------------------------------------- Technique: Simple ----------------------------------------
 
-VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
+VertexShaderOutput SimpleVertexShader(VertexShaderOutput input)
 {
 	// Allocate an empty output struct
 	VertexShaderOutput output = (VertexShaderOutput)0;
@@ -94,7 +107,9 @@ VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
 float4 SimplePixelShader(VertexShaderOutput input) : COLOR0
 {
 	//float4 color = NormalColor(input);
-	float4 color = ProceduralColor(input);
+	//float4 color = ProceduralColor(input);
+	//float4 color = LambertianLighting(input);
+	float4 color = AmbientShading(input);
 	return color;
 }
 
