@@ -71,7 +71,7 @@ namespace GraphicsPractical2
             this.model = this.Content.Load<Model>("Models/Teapot");
             this.model.Meshes[0].MeshParts[0].Effect = effect;
 
-            // Set Diffusecolor
+            // Set Diffusecolor and light direction
             this.modelMaterial.DiffuseColor = Color.Red;
             this.light = new Vector4(-1, -1, -1, 0);
 

@@ -49,7 +49,6 @@ float4 NormalColor(VertexShaderOutput input)
 float4 ProceduralColor(VertexShaderOutput input)
 {
 	//1.2 Checkerboard pattern
-	// Set scalar for checkers
 	int checkerSize = 5;
 	float X = input.Coordinate.x;
 	float Y = input.Coordinate.y;
@@ -75,10 +74,11 @@ float4 ProceduralColor(VertexShaderOutput input)
 	}
 }
 
+// LambertianLighting implementation
 float4 LambertianLighting(VertexShaderOutput input)
 {
 	float3x3 rotationAndScale = (float3x3) World;
-		return Color * max(0, dot(normalize(mul(input.Normal, rotationAndScale)), normalize((-1) * normalize(LightDirection))));
+	return Color * max(0, dot(normalize(mul(input.Normal, rotationAndScale)), normalize((-1) * normalize(LightDirection))));
 }
 
 //---------------------------------------- Technique: Simple ----------------------------------------
@@ -90,8 +90,8 @@ VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
 
 	// Do the matrix multiplications for perspective projection and the world transform
 	float4 worldPosition = mul(input.Position3D, World);
-		float4 viewPosition = mul(worldPosition, View);
-		output.Position2D = mul(viewPosition, Projection);
+	float4 viewPosition = mul(worldPosition, View);
+	output.Position2D = mul(viewPosition, Projection);
 	//1.1 Coloring using normals (add normal values to the output, so it can be used for coloring)
 	output.Normal = input.Normal3D;
 	//1.2 Checkerboard pattern (add pixel coordinates)
