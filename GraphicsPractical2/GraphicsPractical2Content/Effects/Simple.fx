@@ -50,32 +50,18 @@ float4 ProceduralColor(VertexShaderOutput input)
 	// Set scalar for checkers
 	int scalar = 5;
 	
-			// Implicit casting from (float) to (int)
-	int posX = abs(input.Coordinate.x * scalar) % 2;
-		int posY = abs(input.Coordinate.y * scalar) % 2;
-	
-			// Toggle between signs being both equal or not
-	if (sign(input.Coordinate.x) == sign(input.Coordinate.y)) {
-		if (posX == posY) {
-			return float4(-input.Normal.x, -input.Normal.y, -input.Normal.z, 1);
-			
-		}
-		else {
-			return float4(input.Normal.x, input.Normal.y, input.Normal.z, 1);
-			
-		}
-		
+	bool x = (int)(input.Coordinate.x*scalar) % 2;
+	bool y = (int)(input.Coordinate.y*scalar) % 2;	
+
+	bool test = x != y;
+
+	if (test) 
+	{
+			return float4(-input.Normal.x, -input.Normal.y, -input.Normal.z, 1);		
 	}
-	else {
-		if (posX == posY) {
+	else 
+	{
 			return float4(input.Normal.x, input.Normal.y, input.Normal.z, 1);
-			
-		}
-		else {
-			return float4(-input.Normal.x, -input.Normal.y, -input.Normal.z, 1);
-			
-		}
-		
 	}
 }
 
@@ -92,7 +78,7 @@ VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
 	output.Position2D    = mul(viewPosition, Projection);
 	//1.1 Coloring using normals (add normal values to the output, so it can be used for coloring)
 	output.Normal = input.Normal3D;
-	// Assign 3D coordinates for procedural texture rendering
+	//1.2 Checkerboard pattern ()
 	output.Coordinate = input.Position3D.xy;
 
 	return output;
