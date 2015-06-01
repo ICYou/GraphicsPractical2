@@ -11,6 +11,7 @@ float4 AmbientColor;
 float AmbientIntensity;
 // Matrices for 3D perspective projection 
 float4x4 View, Projection, World;
+float4 Color, LightDirection;
 
 //---------------------------------- Input / Output structures ----------------------------------
 
@@ -50,11 +51,13 @@ float4 NormalColor(VertexShaderOutput input)
 // Implement the Procedural texturing assignment here
 float4 ProceduralColor(VertexShaderOutput input)
 {
+	//1.2 Checkerboard pattern
 	// Set scalar for checkers
 	int checkerSize = 5;
 	float X = input.Coordinate.x;
 	float Y = input.Coordinate.y;
 	
+	//Comment
 	if (X < 0)
 		X--;
 	if (Y < 0)
@@ -75,6 +78,7 @@ float4 ProceduralColor(VertexShaderOutput input)
 	}
 }
 
+<<<<<<< HEAD
 float4 LambertianLighting(VertexShaderInput input){
 
 	return float4(1, 0, 0, 1);
@@ -83,6 +87,12 @@ float4 LambertianLighting(VertexShaderInput input){
 float4 AmbientShading(VertexShaderInput input)
 {
 	return LambertianLighting(input) + AmbientColor * AmbientIntensity;
+=======
+float4 LambertianLighting(VertexShaderOutput input)
+{
+	float3x3 rotationAndScale = (float3x3) World;
+	return Color * max(0, dot(normalize(mul(input.Normal, rotationAndScale)), normalize((-1) * normalize(LightDirection))));
+>>>>>>> origin/master
 }
 
 //---------------------------------------- Technique: Simple ----------------------------------------
@@ -98,7 +108,7 @@ VertexShaderOutput SimpleVertexShader(VertexShaderOutput input)
 	output.Position2D    = mul(viewPosition, Projection);
 	//1.1 Coloring using normals (add normal values to the output, so it can be used for coloring)
 	output.Normal = input.Normal3D;
-	//1.2 Checkerboard pattern ()
+	//1.2 Checkerboard pattern (add pixel coordinates)
 	output.Coordinate = input.Position3D.xy;
 
 	return output;
@@ -108,8 +118,12 @@ float4 SimplePixelShader(VertexShaderOutput input) : COLOR0
 {
 	//float4 color = NormalColor(input);
 	//float4 color = ProceduralColor(input);
+<<<<<<< HEAD
 	//float4 color = LambertianLighting(input);
 	float4 color = AmbientShading(input);
+=======
+	float4 color = LambertianLighting(input);
+>>>>>>> origin/master
 	return color;
 }
 

@@ -20,6 +20,7 @@ namespace GraphicsPractical2
 
         // Game objects and variables
         private Camera camera;
+        private Vector4 light;
         
         // Model
         private Model model;
@@ -70,8 +71,14 @@ namespace GraphicsPractical2
             this.model = this.Content.Load<Model>("Models/Teapot");
             this.model.Meshes[0].MeshParts[0].Effect = effect;
 
+<<<<<<< HEAD
             this.modelMaterial.AmbientColor = Color.Red;
             this.modelMaterial.AmbientIntensity = 0.2f;
+=======
+            // Set Diffusecolor
+            this.modelMaterial.DiffuseColor = Color.Red;
+            this.light = new Vector4(-1,-1,-1, 0);
+>>>>>>> origin/master
 
             // Setup the quad
             this.setupQuad();
@@ -124,7 +131,9 @@ namespace GraphicsPractical2
             ModelMesh mesh = this.model.Meshes[0];
             Effect effect = mesh.Effects[0];
 
-            // Set the effect parameters
+            // Set the effect parameters, Color and LightSource
+            effect.Parameters["Color"].SetValue(modelMaterial.DiffuseColor.ToVector4());          
+            effect.Parameters["LightDirection"].SetValue(light);
             effect.CurrentTechnique = effect.Techniques["Simple"];
             // Matrices for 3D perspective projection
             this.camera.SetEffectParameters(effect);
