@@ -11,7 +11,6 @@ float4 AmbientColor;
 float AmbientIntensity;
 // Matrices for 3D perspective projection 
 float4x4 View, Projection, World;
-float4 Color, LightDirection;
 
 //---------------------------------- Input / Output structures ----------------------------------
 
@@ -51,20 +50,18 @@ float4 NormalColor(VertexShaderOutput input)
 // Implement the Procedural texturing assignment here
 float4 ProceduralColor(VertexShaderOutput input)
 {
-	//1.2 Checkerboard pattern
 	// Set scalar for checkers
 	int checkerSize = 5;
 	float X = input.Coordinate.x;
 	float Y = input.Coordinate.y;
 	
-	//Comment
 	if (X < 0)
 		X--;
 	if (Y < 0)
 		Y--;
 
-	bool x = (int)(X * checkerSize) % 2;
-	bool y = (int)(Y * checkerSize) % 2;	
+	bool x = sign((int)(X * checkerSize) % 2);
+	bool y = sign((int)(Y * checkerSize) % 2);	
 
 	bool test = x != y;
 
@@ -78,6 +75,7 @@ float4 ProceduralColor(VertexShaderOutput input)
 	}
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 float4 LambertianLighting(VertexShaderInput input){
 
@@ -95,6 +93,8 @@ float4 LambertianLighting(VertexShaderOutput input)
 >>>>>>> origin/master
 }
 
+=======
+>>>>>>> parent of 38b4467... 2.1
 //---------------------------------------- Technique: Simple ----------------------------------------
 
 VertexShaderOutput SimpleVertexShader(VertexShaderOutput input)
@@ -108,7 +108,7 @@ VertexShaderOutput SimpleVertexShader(VertexShaderOutput input)
 	output.Position2D    = mul(viewPosition, Projection);
 	//1.1 Coloring using normals (add normal values to the output, so it can be used for coloring)
 	output.Normal = input.Normal3D;
-	//1.2 Checkerboard pattern (add pixel coordinates)
+	//1.2 Checkerboard pattern ()
 	output.Coordinate = input.Position3D.xy;
 
 	return output;
@@ -117,6 +117,7 @@ VertexShaderOutput SimpleVertexShader(VertexShaderOutput input)
 float4 SimplePixelShader(VertexShaderOutput input) : COLOR0
 {
 	//float4 color = NormalColor(input);
+<<<<<<< HEAD
 	//float4 color = ProceduralColor(input);
 <<<<<<< HEAD
 	//float4 color = LambertianLighting(input);
@@ -124,6 +125,9 @@ float4 SimplePixelShader(VertexShaderOutput input) : COLOR0
 =======
 	float4 color = LambertianLighting(input);
 >>>>>>> origin/master
+=======
+	float4 color = ProceduralColor(input);
+>>>>>>> parent of 38b4467... 2.1
 	return color;
 }
 
