@@ -8,7 +8,9 @@
 
 // Matrices for 3D perspective projection 
 float4x4 View, Projection, World;
-float4 Color, LightDirection;
+float4 Color, LightDirection, AmbientColor;
+float AmbientIntensity;
+
 
 //---------------------------------- Input / Output structures ----------------------------------
 
@@ -77,8 +79,14 @@ float4 ProceduralColor(VertexShaderOutput input)
 // LambertianLighting implementation
 float4 LambertianLighting(VertexShaderOutput input)
 {
+	
 	float3x3 rotationAndScale = (float3x3) World;
-	return Color * max(0, dot(normalize(mul(input.Normal, rotationAndScale)), normalize((-1) * normalize(LightDirection))));
+		//lambertian calculation
+		float4 lamb = Color * max(0, dot(normalize(mul(input.Normal, rotationAndScale)), normalize((-1) * normalize(LightDirection))));
+		//ambientcolor calculation
+		float4 ambColor = AmbientColor * AmbientIntensity;
+
+		return lamb + ambColor;
 }
 
 //---------------------------------------- Technique: Simple ----------------------------------------

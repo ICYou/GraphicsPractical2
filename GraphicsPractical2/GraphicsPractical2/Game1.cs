@@ -71,8 +71,10 @@ namespace GraphicsPractical2
             this.model = this.Content.Load<Model>("Models/Teapot");
             this.model.Meshes[0].MeshParts[0].Effect = effect;
 
-            // Set Diffusecolor and light direction
+            // Set Diffuse- & ambientcolor, ambient intensity and light direction
             this.modelMaterial.DiffuseColor = Color.Red;
+            this.modelMaterial.AmbientColor = Color.Red;
+            this.modelMaterial.AmbientIntensity = 0.2f;
             this.light = new Vector4(-1, -1, -1, 0);
 
             // Setup the quad
@@ -126,9 +128,11 @@ namespace GraphicsPractical2
             ModelMesh mesh = this.model.Meshes[0];
             Effect effect = mesh.Effects[0];
 
-            // Set the effect parameters, Color and LightSource
+            // Set the effect parameters, Color, LightSource and Ambient
             effect.Parameters["Color"].SetValue(modelMaterial.DiffuseColor.ToVector4());
             effect.Parameters["LightDirection"].SetValue(light);
+            effect.Parameters["AmbientColor"].SetValue(modelMaterial.AmbientColor.ToVector4());
+            effect.Parameters["AmbientIntensity"].SetValue(modelMaterial.AmbientIntensity);
             effect.CurrentTechnique = effect.Techniques["Simple"];
             // Matrices for 3D perspective projection
             this.camera.SetEffectParameters(effect);
