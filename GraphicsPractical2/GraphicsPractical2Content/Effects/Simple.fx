@@ -74,9 +74,6 @@ float4 ProceduralColor(VertexShaderOutput input)
 			return float4(input.Normal.x, input.Normal.y, input.Normal.z, 1);
 	}
 }
-
-<<<<<<< HEAD
-<<<<<<< HEAD
 float4 LambertianLighting(VertexShaderInput input){
 
 	return float4(1, 0, 0, 1);
@@ -85,16 +82,14 @@ float4 LambertianLighting(VertexShaderInput input){
 float4 AmbientShading(VertexShaderInput input)
 {
 	return LambertianLighting(input) + AmbientColor * AmbientIntensity;
-=======
+}
 float4 LambertianLighting(VertexShaderOutput input)
 {
 	float3x3 rotationAndScale = (float3x3) World;
 	return Color * max(0, dot(normalize(mul(input.Normal, rotationAndScale)), normalize((-1) * normalize(LightDirection))));
->>>>>>> origin/master
+
 }
 
-=======
->>>>>>> parent of 38b4467... 2.1
 //---------------------------------------- Technique: Simple ----------------------------------------
 
 VertexShaderOutput SimpleVertexShader(VertexShaderOutput input)
@@ -117,17 +112,18 @@ VertexShaderOutput SimpleVertexShader(VertexShaderOutput input)
 float4 SimplePixelShader(VertexShaderOutput input) : COLOR0
 {
 	//float4 color = NormalColor(input);
-<<<<<<< HEAD
+
 	//float4 color = ProceduralColor(input);
-<<<<<<< HEAD
+
 	//float4 color = LambertianLighting(input);
 	float4 color = AmbientShading(input);
-=======
+
 	float4 color = LambertianLighting(input);
->>>>>>> origin/master
-=======
+
 	float4 color = ProceduralColor(input);
->>>>>>> parent of 38b4467... 2.1
+
+	float4 color = ProceduralColor(input);
+
 	return color;
 }
 

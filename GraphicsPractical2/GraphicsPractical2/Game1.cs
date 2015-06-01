@@ -69,19 +69,15 @@ namespace GraphicsPractical2
             // Load the model and let it use the "Simple" effect
             this.model = this.Content.Load<Model>("Models/Teapot");
             this.model.Meshes[0].MeshParts[0].Effect = effect;
-<<<<<<< HEAD
 
-<<<<<<< HEAD
             this.modelMaterial.AmbientColor = Color.Red;
             this.modelMaterial.AmbientIntensity = 0.2f;
-=======
+
             // Set Diffusecolor
             this.modelMaterial.DiffuseColor = Color.Red;
             this.light = new Vector4(-1,-1,-1, 0);
->>>>>>> origin/master
 
-=======
->>>>>>> parent of 38b4467... 2.1
+
             // Setup the quad
             this.setupQuad();
         }
@@ -138,7 +134,7 @@ namespace GraphicsPractical2
             // Matrices for 3D perspective projection
             this.camera.SetEffectParameters(effect);
             effect.Parameters["World"].SetValue(Matrix.CreateScale(10.0f));
-            effect.Parameters[""]
+       //     effect.Parameters[""]
             // Draw the model
             mesh.Draw();
 
