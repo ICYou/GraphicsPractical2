@@ -5,12 +5,10 @@
 //------------------------------------- Top Level Variables -------------------------------------
 
 // Top level variables can and have to be set at runtime
-float4 Color;
-float3 LightSource;
-float4 AmbientColor;
-float AmbientIntensity;
+
 // Matrices for 3D perspective projection 
 float4x4 View, Projection, World;
+float4 Color, LightDirection;
 
 //---------------------------------- Input / Output structures ----------------------------------
 
@@ -50,60 +48,53 @@ float4 NormalColor(VertexShaderOutput input)
 // Implement the Procedural texturing assignment here
 float4 ProceduralColor(VertexShaderOutput input)
 {
+	//1.2 Checkerboard pattern
 	// Set scalar for checkers
 	int checkerSize = 5;
 	float X = input.Coordinate.x;
 	float Y = input.Coordinate.y;
-	
+
+	//Comment
 	if (X < 0)
 		X--;
 	if (Y < 0)
 		Y--;
 
-	bool x = sign((int)(X * checkerSize) % 2);
-	bool y = sign((int)(Y * checkerSize) % 2);	
+	bool x = (int)(X * checkerSize) % 2;
+	bool y = (int)(Y * checkerSize) % 2;
 
 	bool test = x != y;
 
-	if (test) 
+	if (test)
 	{
-			return float4(-input.Normal.x, -input.Normal.y, -input.Normal.z, 1);		
+		return float4(-input.Normal.x, -input.Normal.y, -input.Normal.z, 1);
 	}
-	else 
+	else
 	{
-			return float4(input.Normal.x, input.Normal.y, input.Normal.z, 1);
+		return float4(input.Normal.x, input.Normal.y, input.Normal.z, 1);
 	}
-}
-float4 LambertianLighting(VertexShaderInput input){
-
-	return float4(1, 0, 0, 1);
 }
 
-float4 AmbientShading(VertexShaderInput input)
-{
-	return LambertianLighting(input) + AmbientColor * AmbientIntensity;
-}
 float4 LambertianLighting(VertexShaderOutput input)
 {
 	float3x3 rotationAndScale = (float3x3) World;
-	return Color * max(0, dot(normalize(mul(input.Normal, rotationAndScale)), normalize((-1) * normalize(LightDirection))));
-
+		return Color * max(0, dot(normalize(mul(input.Normal, rotationAndScale)), normalize((-1) * normalize(LightDirection))));
 }
 
 //---------------------------------------- Technique: Simple ----------------------------------------
 
-VertexShaderOutput SimpleVertexShader(VertexShaderOutput input)
+VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
 {
 	// Allocate an empty output struct
 	VertexShaderOutput output = (VertexShaderOutput)0;
 
 	// Do the matrix multiplications for perspective projection and the world transform
 	float4 worldPosition = mul(input.Position3D, World);
-    float4 viewPosition  = mul(worldPosition, View);
-	output.Position2D    = mul(viewPosition, Projection);
+		float4 viewPosition = mul(worldPosition, View);
+		output.Position2D = mul(viewPosition, Projection);
 	//1.1 Coloring using normals (add normal values to the output, so it can be used for coloring)
 	output.Normal = input.Normal3D;
-	//1.2 Checkerboard pattern ()
+	//1.2 Checkerboard pattern (add pixel coordinates)
 	output.Coordinate = input.Position3D.xy;
 
 	return output;
@@ -112,18 +103,8 @@ VertexShaderOutput SimpleVertexShader(VertexShaderOutput input)
 float4 SimplePixelShader(VertexShaderOutput input) : COLOR0
 {
 	//float4 color = NormalColor(input);
-
 	//float4 color = ProceduralColor(input);
-
-	//float4 color = LambertianLighting(input);
-	float4 color = AmbientShading(input);
-
 	float4 color = LambertianLighting(input);
-
-	float4 color = ProceduralColor(input);
-
-	float4 color = ProceduralColor(input);
-
 	return color;
 }
 
@@ -132,6 +113,6 @@ technique Simple
 	pass Pass0
 	{
 		VertexShader = compile vs_2_0 SimpleVertexShader();
-		PixelShader  = compile ps_2_0 SimplePixelShader();
+		PixelShader = compile ps_2_0 SimplePixelShader();
 	}
 }
