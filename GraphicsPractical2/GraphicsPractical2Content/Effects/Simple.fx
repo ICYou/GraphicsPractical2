@@ -17,6 +17,8 @@ float4x4 View, Projection, World;
 struct VertexShaderInput
 {
 	float4 Position3D : POSITION0;
+	float4 Normal3D : NORMAL0;
+
 };
 
 // The output of the vertex shader. After being passed through the interpolator/rasterizer it is also 
@@ -30,14 +32,15 @@ struct VertexShaderInput
 struct VertexShaderOutput
 {
 	float4 Position2D : POSITION0;
+	float4 Normal : TEXCOORD0;
 };
 
 //------------------------------------------ Functions ------------------------------------------
 
 // Implement the Coloring using normals assignment here
-float4 NormalColor(/* parameter(s) */)
+float4 NormalColor(VertexShaderOutput input)
 {
-	return float4(1, 0, 0, 1);
+	return float4(input.Normal.x, input.Normal.y, input.Normal.z, 1);
 }
 
 // Implement the Procedural texturing assignment here
@@ -57,14 +60,15 @@ VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
 	float4 worldPosition = mul(input.Position3D, World);
     float4 viewPosition  = mul(worldPosition, View);
 	output.Position2D    = mul(viewPosition, Projection);
+	//1.1 Coloring using normals (add normal values to the output, so it can be used for coloring)
+	output.Normal = input.Normal3D;
 
 	return output;
 }
 
 float4 SimplePixelShader(VertexShaderOutput input) : COLOR0
 {
-	float4 color = NormalColor();
-
+	float4 color = NormalColor(input);
 	return color;
 }
 
