@@ -12,6 +12,16 @@ float4 DiffuseColor, LightDirection, AmbientColor, SpecularColor;
 float AmbientIntensity, SpecularIntensity, SpecularPower;
 float3 CameraPosition;
 
+texture Texture;
+sampler ColorTextureSampler : register(s0)
+{
+	Texture = (Texture);
+	MinFilter = Linear;
+	MagFilter = Linear;
+	MipFilter = Linear;
+	AddressU = Wrap;
+	AddressV = Wrap;
+};
 
 //---------------------------------- Input / Output structures ----------------------------------
 
@@ -22,6 +32,7 @@ struct VertexShaderInput
 {
 	float4 Position3D : POSITION0;
 	float4 Normal3D : NORMAL0;
+	float2 TexCoord : TEXCOORD0;
 
 };
 
@@ -38,6 +49,7 @@ struct VertexShaderOutput
 	float4 Position2D : POSITION0;
 	float4 Normal : TEXCOORD0;
 	float4 Position3D : TEXCOORD1;
+	float2 TexCoord : TEXCOORD3;
 };
 
 //------------------------------------------ Functions ------------------------------------------
@@ -114,6 +126,12 @@ float4 PhongLighting(VertexShaderOutput input)
 		return diffColor + ambColor + specColor;
 }
 
+//Texture
+float4 TextureColor(VertexShaderOutput input)
+{
+	float4 Color = tex2D(ColorTextureSampler, input.TexCoord);
+		return Color;
+}
 //---------------------------------------- Technique: Simple ----------------------------------------
 
 VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
@@ -134,6 +152,7 @@ VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
 	//1.2 Checkerboard pattern (add pixel coordinates)
 	output.Position3D = input.Position3D;
 
+
 	return output;
 }
 
@@ -146,11 +165,47 @@ float4 SimplePixelShader(VertexShaderOutput input) : COLOR0
 	return color;
 }
 
+VertexShaderOutput TextureVertexShader(VertexShaderInput input)
+{
+	// Allocate an empty output struct
+	VertexShaderOutput output = (VertexShaderOutput)0;
+
+	// Do the matrix multiplications for perspective projection and the world transform
+	//2.3
+	float4 worldPosition = mul(input.Position3D, World);
+
+		float4 viewPosition = mul(worldPosition, View);
+		output.Position2D = mul(viewPosition, Projection);
+
+	//3.1
+	output.TexCoord = input.TexCoord;
+
+	return output;
+}
+
+float4 TexturePixelShader(VertexShaderOutput input) : COLOR0
+{
+	//float4 color = NormalColor(input);
+	//float4 color = ProceduralColor(input);
+	//float4 color = LambertianLighting(input); //(+ 2.2)
+	//float4 color = PhongLighting(input);
+	float4 color = TextureColor(input);
+	return color;
+}
+
 technique Simple
 {
 	pass Pass0
 	{
 		VertexShader = compile vs_2_0 SimpleVertexShader();
 		PixelShader = compile ps_2_0 SimplePixelShader();
+	}
+}
+technique TextureTech
+{
+	pass Pass0
+	{
+		VertexShader = compile vs_2_0 TextureVertexShader();
+		PixelShader = compile ps_2_0 TexturePixelShader();
 	}
 }

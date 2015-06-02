@@ -30,6 +30,7 @@ namespace GraphicsPractical2
         private VertexPositionNormalTexture[] quadVertices;
         private short[] quadIndices;
         private Matrix quadTransform;
+        private Texture2D texture;
 
         public Game1()
         {
@@ -80,6 +81,11 @@ namespace GraphicsPractical2
             this.modelMaterial.SpecularPower = 25.0f;
             this.light = new Vector4(-1, -1, -1, 0);
 
+            // Load Texture
+            texture = Content.Load<Texture2D>("Textures/CobblestonesDiffuse");
+
+            this.GraphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
+            this.GraphicsDevice.Textures[0] = texture;
             // Setup the quad
             this.setupQuad();
         }
@@ -98,18 +104,25 @@ namespace GraphicsPractical2
             // Top left
             this.quadVertices[0].Position = new Vector3(-1, 0, -1);
             this.quadVertices[0].Normal = quadNormal;
+            this.quadVertices[0].TextureCoordinate = new Vector2(-1, -1);            
             // Top right
             this.quadVertices[1].Position = new Vector3(1, 0, -1);
             this.quadVertices[1].Normal = quadNormal;
+            this.quadVertices[1].TextureCoordinate = new Vector2(1, -1);   
             // Bottom left
             this.quadVertices[2].Position = new Vector3(-1, 0, 1);
             this.quadVertices[2].Normal = quadNormal;
+            this.quadVertices[2].TextureCoordinate = new Vector2(-1, 1);   
             // Bottom right
             this.quadVertices[3].Position = new Vector3(1, 0, 1);
             this.quadVertices[3].Normal = quadNormal;
+            this.quadVertices[3].TextureCoordinate = new Vector2(1, 1);   
 
             this.quadIndices = new short[] { 0, 1, 2, 1, 2, 3 };
-            this.quadTransform = Matrix.CreateScale(scale);
+            this.quadTransform = Matrix.CreateScale(scale);           
+            Matrix translation = Matrix.CreateTranslation(0, -15.0f, 0);
+            this.quadTransform = Matrix.Multiply(this.quadTransform, translation);
+
         }
 
         protected override void Update(GameTime gameTime)
@@ -126,6 +139,19 @@ namespace GraphicsPractical2
         {
             // Clear the screen in a predetermined color and clear the depth buffer
             this.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer, Color.DeepSkyBlue, 1.0f, 0);
+
+            texture = Content.Load<Texture2D>("Textures/CobblestonesDiffuse");
+            Effect quadEffect = this.Content.Load<Effect>("Effects/Simple");
+            quadEffect.Parameters["Texture"].SetValue(this.texture);
+            quadEffect.Parameters["World"].SetValue(this.quadTransform);
+            quadEffect.CurrentTechnique = quadEffect.Techniques["TextureTech"];
+            this.camera.SetEffectParameters(quadEffect);
+
+            foreach (EffectPass pass in quadEffect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                this.GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, this.quadVertices, 0, 4, this.quadIndices, 0, 2, VertexPositionNormalTexture.VertexDeclaration);
+            }
 
             // Get the model's only mesh
             ModelMesh mesh = this.model.Meshes[0];
