@@ -84,8 +84,6 @@ namespace GraphicsPractical2
             // Load Texture
             texture = Content.Load<Texture2D>("Textures/CobblestonesDiffuse");
 
-            this.GraphicsDevice.SamplerStates[0] = SamplerState.LinearClamp;
-            this.GraphicsDevice.Textures[0] = texture;
             // Setup the quad
             this.setupQuad();
         }
@@ -119,9 +117,7 @@ namespace GraphicsPractical2
             this.quadVertices[3].TextureCoordinate = new Vector2(1, 1);   
 
             this.quadIndices = new short[] { 0, 1, 2, 1, 2, 3 };
-            this.quadTransform = Matrix.CreateScale(scale);           
-            Matrix translation = Matrix.CreateTranslation(0, -15.0f, 0);
-            this.quadTransform = Matrix.Multiply(this.quadTransform, translation);
+            this.quadTransform = Matrix.Multiply(Matrix.CreateScale(scale), Matrix.CreateTranslation(0, -15.0f, 0));
 
         }
 
@@ -140,23 +136,11 @@ namespace GraphicsPractical2
             // Clear the screen in a predetermined color and clear the depth buffer
             this.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer, Color.DeepSkyBlue, 1.0f, 0);
 
-            texture = Content.Load<Texture2D>("Textures/CobblestonesDiffuse");
-            Effect quadEffect = this.Content.Load<Effect>("Effects/Simple");
-            quadEffect.Parameters["Texture"].SetValue(this.texture);
-            quadEffect.Parameters["World"].SetValue(this.quadTransform);
-            quadEffect.CurrentTechnique = quadEffect.Techniques["TextureTech"];
-            this.camera.SetEffectParameters(quadEffect);
-
-            foreach (EffectPass pass in quadEffect.CurrentTechnique.Passes)
-            {
-                pass.Apply();
-                this.GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, this.quadVertices, 0, 4, this.quadIndices, 0, 2, VertexPositionNormalTexture.VertexDeclaration);
-            }
-
             // Get the model's only mesh
             ModelMesh mesh = this.model.Meshes[0];
             Effect effect = mesh.Effects[0];
-
+            Effect TextureEffect = mesh.Effects[0];
+            
             // Set the effect parameters, Color, LightSource, Ambient and specular
             effect.Parameters["DiffuseColor"].SetValue(modelMaterial.DiffuseColor.ToVector4());
             effect.Parameters["LightDirection"].SetValue(light);
@@ -175,8 +159,21 @@ namespace GraphicsPractical2
             
             effect.Parameters["World"].SetValue(World);
             effect.Parameters["InversedTransposedWorld"].SetValue(InversedTransposedWorld);
+
             // Draw the model
             mesh.Draw();
+
+            //Adding Texture
+            TextureEffect.Parameters["Texture"].SetValue(this.texture);
+            TextureEffect.Parameters["World"].SetValue(this.quadTransform);
+            TextureEffect.CurrentTechnique = TextureEffect.Techniques["TextureTechnique"];
+            this.camera.SetEffectParameters(TextureEffect);
+
+            foreach (EffectPass pass in TextureEffect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                GraphicsDevice.DrawUserIndexedPrimitives<VertexPositionNormalTexture>(PrimitiveType.TriangleList, this.quadVertices, 0, 4, this.quadIndices, 0, 2);
+            }
 
             base.Draw(gameTime);
         }

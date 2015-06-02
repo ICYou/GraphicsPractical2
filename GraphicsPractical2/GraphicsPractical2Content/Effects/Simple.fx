@@ -13,7 +13,7 @@ float AmbientIntensity, SpecularIntensity, SpecularPower;
 float3 CameraPosition;
 
 texture Texture;
-sampler ColorTextureSampler : register(s0)
+sampler TextureSampler : register(s0)
 {
 	Texture = (Texture);
 	MinFilter = Linear;
@@ -32,7 +32,7 @@ struct VertexShaderInput
 {
 	float4 Position3D : POSITION0;
 	float4 Normal3D : NORMAL0;
-	float2 TexCoord : TEXCOORD0;
+	float2 TextureCoord : TEXCOORD0;
 
 };
 
@@ -49,7 +49,7 @@ struct VertexShaderOutput
 	float4 Position2D : POSITION0;
 	float4 Normal : TEXCOORD0;
 	float4 Position3D : TEXCOORD1;
-	float2 TexCoord : TEXCOORD3;
+	float2 TextureCoord : TEXCOORD3;
 };
 
 //------------------------------------------ Functions ------------------------------------------
@@ -129,8 +129,7 @@ float4 PhongLighting(VertexShaderOutput input)
 //Texture
 float4 TextureColor(VertexShaderOutput input)
 {
-	float4 Color = tex2D(ColorTextureSampler, input.TexCoord);
-		return Color;
+	return tex2D(TextureSampler, input.TextureCoord);
 }
 //---------------------------------------- Technique: Simple ----------------------------------------
 
@@ -152,7 +151,6 @@ VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
 	//1.2 Checkerboard pattern (add pixel coordinates)
 	output.Position3D = input.Position3D;
 
-
 	return output;
 }
 
@@ -171,25 +169,21 @@ VertexShaderOutput TextureVertexShader(VertexShaderInput input)
 	VertexShaderOutput output = (VertexShaderOutput)0;
 
 	// Do the matrix multiplications for perspective projection and the world transform
-	//2.3
+	
 	float4 worldPosition = mul(input.Position3D, World);
-
 		float4 viewPosition = mul(worldPosition, View);
 		output.Position2D = mul(viewPosition, Projection);
 
 	//3.1
-	output.TexCoord = input.TexCoord;
+	output.TextureCoord = input.TextureCoord;
 
 	return output;
 }
 
 float4 TexturePixelShader(VertexShaderOutput input) : COLOR0
-{
-	//float4 color = NormalColor(input);
-	//float4 color = ProceduralColor(input);
-	//float4 color = LambertianLighting(input); //(+ 2.2)
-	//float4 color = PhongLighting(input);
+{	
 	float4 color = TextureColor(input);
+
 	return color;
 }
 
@@ -201,7 +195,7 @@ technique Simple
 		PixelShader = compile ps_2_0 SimplePixelShader();
 	}
 }
-technique TextureTech
+technique TextureTechnique
 {
 	pass Pass0
 	{
