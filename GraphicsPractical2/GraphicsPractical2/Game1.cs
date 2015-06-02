@@ -76,7 +76,7 @@ namespace GraphicsPractical2
             this.modelMaterial.AmbientColor = Color.Red;
             this.modelMaterial.AmbientIntensity = 0.2f;
             this.modelMaterial.SpecularColor = Color.White;
-            this.modelMaterial.SpecularIntensity = 25.2f;
+            this.modelMaterial.SpecularIntensity = 25.0f;
             this.light = new Vector4(-1, -1, -1, 0);
 
             // Setup the quad
@@ -138,7 +138,6 @@ namespace GraphicsPractical2
             effect.Parameters["SpecularColor"].SetValue(modelMaterial.SpecularColor.ToVector4());
             effect.Parameters["SpecularPower"].SetValue(modelMaterial.SpecularPower);
             effect.Parameters["SpecularIntensity"].SetValue(modelMaterial.SpecularIntensity);
-            effect.Parameters["View"].SetValue(camera.ViewMatrix);
             effect.CurrentTechnique = effect.Techniques["Simple"];
             // Matrices for 3D perspective projection
             this.camera.SetEffectParameters(effect);

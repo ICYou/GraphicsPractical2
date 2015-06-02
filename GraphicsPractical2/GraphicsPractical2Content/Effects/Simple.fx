@@ -83,28 +83,37 @@ float4 LambertianLighting(VertexShaderOutput input)
 {
 	
 	float3x3 rotationAndScale = (float3x3) World;
-		//lambertian calculation
-		float4 lamb = Color * max(0, dot(normalize(mul(input.Normal, rotationAndScale)), normalize((-1) * normalize(LightDirection))));
-		//ambientcolor calculation
+		//lambertian calculation (2.1)
+		float4 light = (-1) * normalize(LightDirection);
+		float4 lambColor = Color * saturate(dot(normalize(mul(input.Normal, rotationAndScale)), normalize(light)));
+		//ambientcolor calculation (2.2)
 		float4 ambColor = AmbientColor * AmbientIntensity;
 
-		return lamb + ambColor;
+		return lambColor + ambColor;
 }
 
 // PhongLighting implementation
 float4 PhongLighting(VertexShaderOutput input)
 {
-
 	float3x3 rotationAndScale = (float3x3) World;
-		//lambertian calculation
-		float4 lamb = Color * saturate(dot(normalize(mul(input.Normal, rotationAndScale)), normalize((-1) * normalize(LightDirection))));
-		//ambientcolor calculation
+		//lambertian calculation (2.1)
+		float4 light = (-1) * normalize(LightDirection);
+		float4 lambColor = Color * saturate(dot(normalize(mul(input.Normal, rotationAndScale)), normalize(light)));
+		//ambientcolor calculation (2.2)
 		float4 ambColor = AmbientColor * AmbientIntensity;
-		//specular calculation
+		//specular calculation (2.3)
 		float4 viewVector = mul(CameraPosition, World);
-		float4 halfvector = normalize((-1) * normalize(LightDirection) + normalize(mul(input.Position3D, World) - normalize(viewVector)));
-		float4 specColor = SpecularColor * (SpecularIntensity * pow(saturate(dot(halfvector, input.Normal)), SpecularPower));
-		return lamb + ambColor + specColor;
+		//float4 halfvector = normalize(light + normalize(mul(input.Position3D, World) - normalize(viewVector)));
+		//float4 specColor = SpecularColor * (SpecularPower * pow(saturate(dot(halfvector, input.Normal)), SpecularIntensity));
+
+		float3 halfvector = normalize(light - input.Position3D + viewVector);
+		float NdotH = dot(input.Normal, halfvector);
+		float4 specColor = pow(saturate(NdotH), SpecularIntensity);
+		//Is=ks(~n·~h)sLs
+		/*float4 viewVector = mul(CameraPosition, World);
+		float4 halfvector = normalize(light - input.Position3D + viewVector);
+		float4 specColor = SpecularColor *(SpecularPower * (dot(normalize(mul(input.Normal, rotationAndScale)), halfvector) *SpecularIntensity));*/
+		return lambColor + ambColor + specColor;
 }
 
 //---------------------------------------- Technique: Simple ----------------------------------------
