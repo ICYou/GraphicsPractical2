@@ -83,8 +83,9 @@ float4 LambertianLighting(VertexShaderOutput input)
 {
 	
 	float3x3 rotationAndScale = (float3x3) World;
-		//lambertian calculation (2.1)
 		float4 light = (-1) * normalize(LightDirection);
+
+		//lambertian calculation (2.1)
 		float4 lambColor = Color * saturate(dot(normalize(mul(input.Normal, rotationAndScale)), normalize(light)));
 		//ambientcolor calculation (2.2)
 		float4 ambColor = AmbientColor * AmbientIntensity;
@@ -95,24 +96,19 @@ float4 LambertianLighting(VertexShaderOutput input)
 // PhongLighting implementation
 float4 PhongLighting(VertexShaderOutput input)
 {
-	float3x3 rotationAndScale = (float3x3) World;
-		//lambertian calculation (2.1)
+	float3x3 rotationAndScale = (float3x3) World;		
 		float4 light = (-1) * normalize(LightDirection);
+
+		//lambertian calculation (2.1)
 		float4 lambColor = Color * saturate(dot(normalize(mul(input.Normal, rotationAndScale)), normalize(light)));
 		//ambientcolor calculation (2.2)
 		float4 ambColor = AmbientColor * AmbientIntensity;
 		//specular calculation (2.3)
-		float4 viewVector = mul(CameraPosition, World);
-		//float4 halfvector = normalize(light + normalize(mul(input.Position3D, World) - normalize(viewVector)));
-		//float4 specColor = SpecularColor * (SpecularPower * pow(saturate(dot(halfvector, input.Normal)), SpecularIntensity));
-
-		float3 halfvector = normalize(light - input.Position3D + viewVector);
-		float NdotH = dot(input.Normal, halfvector);
-		float4 specColor = pow(saturate(NdotH), SpecularIntensity);
-		//Is=ks(~n·~h)sLs
-		/*float4 viewVector = mul(CameraPosition, World);
-		float4 halfvector = normalize(light - input.Position3D + viewVector);
-		float4 specColor = SpecularColor *(SpecularPower * (dot(normalize(mul(input.Normal, rotationAndScale)), halfvector) *SpecularIntensity));*/
+		float4 viewVector = normalize(mul(CameraPosition, World) - input.Position3D);
+		float4 lightVector = normalize(light - input.Position3D);
+		float4 halfvector = normalize(light + viewVector);
+		float4 specColor = SpecularColor * (SpecularIntensity * pow(saturate(dot(input.Normal, halfvector)), SpecularPower));
+		
 		return lambColor + ambColor + specColor;
 }
 
@@ -141,7 +137,7 @@ float4 SimplePixelShader(VertexShaderOutput input) : COLOR0
 {
 	//float4 color = NormalColor(input);
 	//float4 color = ProceduralColor(input);
-	//float4 color = LambertianLighting(input);
+	//float4 color = LambertianLighting(input); //(+ 2.2)
 	float4 color = PhongLighting(input);
 	return color;
 }

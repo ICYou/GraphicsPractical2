@@ -76,7 +76,8 @@ namespace GraphicsPractical2
             this.modelMaterial.AmbientColor = Color.Red;
             this.modelMaterial.AmbientIntensity = 0.2f;
             this.modelMaterial.SpecularColor = Color.White;
-            this.modelMaterial.SpecularIntensity = 25.0f;
+            this.modelMaterial.SpecularIntensity = 2.0f;
+            this.modelMaterial.SpecularPower = 25.0f;
             this.light = new Vector4(-1, -1, -1, 0);
 
             // Setup the quad
