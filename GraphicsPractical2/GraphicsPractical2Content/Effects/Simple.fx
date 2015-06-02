@@ -8,9 +8,9 @@
 
 // Matrices for 3D perspective projection 
 float4x4 View, Projection, World, InversedTransposedWorld;
-float4 DiffuseColor, LightDirection, AmbientColor, SpecularColor;
+float4 DiffuseColor, AmbientColor, SpecularColor;
 float AmbientIntensity, SpecularIntensity, SpecularPower;
-float3 CameraPosition;
+float3 CameraPosition, PointLight;
 
 texture Texture;
 sampler TextureSampler : register(s0)
@@ -32,7 +32,7 @@ struct VertexShaderInput
 {
 	float4 Position3D : POSITION0;
 	float4 Normal3D : NORMAL0;
-	float2 TextureCoord : TEXCOORD0;
+	float2 TextureCoordinate : TEXCOORD0;
 
 };
 
@@ -49,7 +49,7 @@ struct VertexShaderOutput
 	float4 Position2D : POSITION0;
 	float4 Normal : TEXCOORD0;
 	float4 Position3D : TEXCOORD1;
-	float2 TextureCoord : TEXCOORD3;
+	float2 TextureCoordinate : TEXCOORD3;
 };
 
 //------------------------------------------ Functions ------------------------------------------
@@ -92,10 +92,11 @@ float4 ProceduralColor(VertexShaderOutput input)
 // LambertianLighting implementation
 float4 LambertianLighting(VertexShaderOutput input)
 {
-	float4 lightVector = (-1) * normalize(LightDirection);
-
+	float3x3 rotationAndScale = (float3x3) World;
+		float3 normal = mul(input.Normal, rotationAndScale);
+	
 		//lambertian calculation (2.1)
-		float4 diffColor = DiffuseColor * max(0, dot(input.Normal, normalize(lightVector)));
+		float4 diffColor = DiffuseColor * max(0, saturate(dot(input.Normal, normalize(PointLight - normal))));
 		//ambientcolor calculation (2.2)
 		float4 ambColor = AmbientColor * AmbientIntensity;
 
@@ -104,32 +105,27 @@ float4 LambertianLighting(VertexShaderOutput input)
 
 // PhongLighting implementation
 float4 PhongLighting(VertexShaderOutput input)
-{
-	float4 lightVector = (-1) * normalize(LightDirection);
-		lightVector.w = 0;
-		//Normal Fix
-	//float4 Normal = input.Normal;
-		float4 Normal = mul(input.Normal, InversedTransposedWorld);
-		//3x3 maken
-		Normal.w = 0;
-	Normal = normalize(Normal);
+{		
+		//2.4
+		float3 normal = mul(input.Normal, InversedTransposedWorld);
 
-	//lambertian calculation (2.1)
-	float4 diffColor = DiffuseColor * max(0, dot(Normal, normalize(lightVector)));
+		//lambertian calculation (2.1)
+		float4 diffColor = DiffuseColor * max(0, saturate(dot(input.Normal, normalize(PointLight - normal))));
 		//ambientcolor calculation (2.2)
 		float4 ambColor = AmbientColor * AmbientIntensity;
 		//specular calculation (2.3)
-		float4 viewVector = normalize(mul(CameraPosition, World));
-		//viewVector.w = 0;
-		float4 halfVector = normalize(lightVector + viewVector);
-		float4 specColor = SpecularColor * (SpecularIntensity * pow(saturate(dot(Normal, halfVector)), SpecularPower));
+		float3 lightVector = normalize(PointLight - input.Position3D);
+		float3 viewVector = normalize(CameraPosition - input.Position3D);
+		float3 halfVector = normalize(lightVector + viewVector);
+		float specColor = SpecularColor * pow(saturate(dot(input.Normal, halfVector)), SpecularPower) * SpecularIntensity;
+
 		return diffColor + ambColor + specColor;
 }
 
 //Texture
 float4 TextureColor(VertexShaderOutput input)
 {
-	return tex2D(TextureSampler, input.TextureCoord);
+	return tex2D(TextureSampler, input.TextureCoordinate);
 }
 //---------------------------------------- Technique: Simple ----------------------------------------
 
@@ -139,9 +135,7 @@ VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
 	VertexShaderOutput output = (VertexShaderOutput)0;
 
 	// Do the matrix multiplications for perspective projection and the world transform
-	//2.3
 	float4 worldPosition = mul(input.Position3D, World);
-
 		float4 viewPosition = mul(worldPosition, View);
 		output.Position2D = mul(viewPosition, Projection);
 
@@ -156,13 +150,15 @@ VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
 
 float4 SimplePixelShader(VertexShaderOutput input) : COLOR0
 {
-	//float4 color = NormalColor(input);
-	//float4 color = ProceduralColor(input);
-	//float4 color = LambertianLighting(input); //(+ 2.2)
-	float4 color = PhongLighting(input);
+	//Uncomment the one you want to see
+	//float4 color = NormalColor(input); //1.1
+	//float4 color = ProceduralColor(input); //1.2
+	//float4 color = LambertianLighting(input); //(2.1 + 2.2)
+	float4 color = PhongLighting(input);	//2.3,2.4
 	return color;
 }
 
+//---------------------------------------- Technique: TextureTechnique ----------------------------------------
 VertexShaderOutput TextureVertexShader(VertexShaderInput input)
 {
 	// Allocate an empty output struct
@@ -175,7 +171,7 @@ VertexShaderOutput TextureVertexShader(VertexShaderInput input)
 		output.Position2D = mul(viewPosition, Projection);
 
 	//3.1
-	output.TextureCoord = input.TextureCoord;
+	output.TextureCoordinate = input.TextureCoordinate;
 
 	return output;
 }

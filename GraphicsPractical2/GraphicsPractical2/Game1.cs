@@ -20,7 +20,7 @@ namespace GraphicsPractical2
 
         // Game objects and variables
         private Camera camera;
-        private Vector4 light;
+        private Vector3 Light;
 
         // Model
         private Model model;
@@ -79,7 +79,7 @@ namespace GraphicsPractical2
             this.modelMaterial.SpecularColor = Color.White;
             this.modelMaterial.SpecularIntensity = 2.0f;
             this.modelMaterial.SpecularPower = 25.0f;
-            this.light = new Vector4(-1, -1, -1, 0);
+            this.Light = new Vector3(50, 50, 50);
 
             // Load Texture
             texture = Content.Load<Texture2D>("Textures/CobblestonesDiffuse");
@@ -143,7 +143,7 @@ namespace GraphicsPractical2
             
             // Set the effect parameters, Color, LightSource, Ambient and specular
             effect.Parameters["DiffuseColor"].SetValue(modelMaterial.DiffuseColor.ToVector4());
-            effect.Parameters["LightDirection"].SetValue(light);
+            effect.Parameters["PointLight"].SetValue(Light);
             effect.Parameters["AmbientColor"].SetValue(modelMaterial.AmbientColor.ToVector4());
             effect.Parameters["AmbientIntensity"].SetValue(modelMaterial.AmbientIntensity);
             effect.Parameters["SpecularColor"].SetValue(modelMaterial.SpecularColor.ToVector4());
