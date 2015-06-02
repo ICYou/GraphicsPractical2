@@ -7,7 +7,7 @@
 // Top level variables can and have to be set at runtime
 
 // Matrices for 3D perspective projection 
-float4x4 View, Projection, World;
+float4x4 View, Projection, World, InversedTransposedWorld;
 float4 Color, LightDirection, AmbientColor, SpecularColor;
 float AmbientIntensity, SpecularIntensity, SpecularPower;
 float3 CameraPosition;
@@ -81,12 +81,10 @@ float4 ProceduralColor(VertexShaderOutput input)
 // LambertianLighting implementation
 float4 LambertianLighting(VertexShaderOutput input)
 {
-	
-	float3x3 rotationAndScale = (float3x3) World;
-		float4 light = (-1) * normalize(LightDirection);
+	float4 lightVector = (-1) * normalize(LightDirection);
 
 		//lambertian calculation (2.1)
-		float4 lambColor = Color * saturate(dot(normalize(mul(input.Normal, rotationAndScale)), normalize(light)));
+		float4 lambColor = Color * max(0, dot(input.Normal, normalize(lightVector)));
 		//ambientcolor calculation (2.2)
 		float4 ambColor = AmbientColor * AmbientIntensity;
 
@@ -96,19 +94,21 @@ float4 LambertianLighting(VertexShaderOutput input)
 // PhongLighting implementation
 float4 PhongLighting(VertexShaderOutput input)
 {
-	float3x3 rotationAndScale = (float3x3) World;		
-		float4 light = (-1) * normalize(LightDirection);
+	float4 lightVector = (-1) * normalize(LightDirection);
+		//Normal Fix
+		float4 Normal = mul(input.Normal, InversedTransposedWorld);
+		//3x3 maken
+		Normal.w = 0;
+	Normal = normalize(Normal);
 
-		//lambertian calculation (2.1)
-		float4 lambColor = Color * saturate(dot(normalize(mul(input.Normal, rotationAndScale)), normalize(light)));
+	//lambertian calculation (2.1)
+	float4 lambColor = Color * max(0, dot(Normal, normalize(lightVector)));
 		//ambientcolor calculation (2.2)
 		float4 ambColor = AmbientColor * AmbientIntensity;
 		//specular calculation (2.3)
 		float4 viewVector = normalize(mul(CameraPosition, World) - input.Position3D);
-		float4 lightVector = normalize(light - input.Position3D);
-		float4 halfvector = normalize(light + viewVector);
-		float4 specColor = SpecularColor * (SpecularIntensity * pow(saturate(dot(input.Normal, halfvector)), SpecularPower));
-		
+		float4 halfVector = normalize(lightVector + viewVector);
+		float4 specColor = SpecularColor * (SpecularIntensity * pow(saturate(dot(input.Normal, halfVector)), SpecularPower));
 		return lambColor + ambColor + specColor;
 }
 
@@ -120,15 +120,18 @@ VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
 	VertexShaderOutput output = (VertexShaderOutput)0;
 
 	// Do the matrix multiplications for perspective projection and the world transform
+	//2.3
 	float4 worldPosition = mul(input.Position3D, World);
-	float4 viewPosition = mul(worldPosition, View);
-	output.Position2D = mul(viewPosition, Projection);
+
+		float4 viewPosition = mul(worldPosition, View);
+		output.Position2D = mul(viewPosition, Projection);
+
 	//1.1 Coloring using normals (add normal values to the output, so it can be used for coloring)
 	output.Normal = input.Normal3D;
+
 	//1.2 Checkerboard pattern (add pixel coordinates)
 	output.Coordinate = input.Position3D.xy;
-	//2.3
-	output.Position3D = mul(input.Position3D, World);
+	output.Position3D = input.Position3D;
 
 	return output;
 }
