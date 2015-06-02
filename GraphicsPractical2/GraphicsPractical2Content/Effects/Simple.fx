@@ -95,7 +95,9 @@ float4 LambertianLighting(VertexShaderOutput input)
 float4 PhongLighting(VertexShaderOutput input)
 {
 	float4 lightVector = (-1) * normalize(LightDirection);
+		lightVector.w = 0;
 		//Normal Fix
+	//float4 Normal = input.Normal;
 		float4 Normal = mul(input.Normal, InversedTransposedWorld);
 		//3x3 maken
 		Normal.w = 0;
@@ -106,9 +108,10 @@ float4 PhongLighting(VertexShaderOutput input)
 		//ambientcolor calculation (2.2)
 		float4 ambColor = AmbientColor * AmbientIntensity;
 		//specular calculation (2.3)
-		float4 viewVector = normalize(mul(CameraPosition, World) - input.Position3D);
+		float4 viewVector = normalize(mul(CameraPosition, World));
+		//viewVector.w = 0;
 		float4 halfVector = normalize(lightVector + viewVector);
-		float4 specColor = SpecularColor * (SpecularIntensity * pow(saturate(dot(input.Normal, halfVector)), SpecularPower));
+		float4 specColor = SpecularColor * (SpecularIntensity * pow(saturate(dot(Normal, halfVector)), SpecularPower));
 		return lambColor + ambColor + specColor;
 }
 
