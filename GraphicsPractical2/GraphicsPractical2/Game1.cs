@@ -132,7 +132,7 @@ namespace GraphicsPractical2
             Effect effect = mesh.Effects[0];
 
             // Set the effect parameters, Color, LightSource, Ambient and specular
-            effect.Parameters["Color"].SetValue(modelMaterial.DiffuseColor.ToVector4());
+            effect.Parameters["DiffuseColor"].SetValue(modelMaterial.DiffuseColor.ToVector4());
             effect.Parameters["LightDirection"].SetValue(light);
             effect.Parameters["AmbientColor"].SetValue(modelMaterial.AmbientColor.ToVector4());
             effect.Parameters["AmbientIntensity"].SetValue(modelMaterial.AmbientIntensity);

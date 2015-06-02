@@ -8,7 +8,7 @@
 
 // Matrices for 3D perspective projection 
 float4x4 View, Projection, World, InversedTransposedWorld;
-float4 Color, LightDirection, AmbientColor, SpecularColor;
+float4 DiffuseColor, LightDirection, AmbientColor, SpecularColor;
 float AmbientIntensity, SpecularIntensity, SpecularPower;
 float3 CameraPosition;
 
@@ -37,8 +37,7 @@ struct VertexShaderOutput
 {
 	float4 Position2D : POSITION0;
 	float4 Normal : TEXCOORD0;
-	float2 Coordinate : TEXCOORD1;
-	float4 Position3D : TEXCOORD2;
+	float4 Position3D : TEXCOORD1;
 };
 
 //------------------------------------------ Functions ------------------------------------------
@@ -54,8 +53,8 @@ float4 ProceduralColor(VertexShaderOutput input)
 {
 	//1.2 Checkerboard pattern
 	int checkerSize = 5;
-	float X = input.Coordinate.x;
-	float Y = input.Coordinate.y;
+	float X = input.Position3D.x;
+	float Y = input.Position3D.y;
 
 	//Comment
 	if (X < 0)
@@ -84,11 +83,11 @@ float4 LambertianLighting(VertexShaderOutput input)
 	float4 lightVector = (-1) * normalize(LightDirection);
 
 		//lambertian calculation (2.1)
-		float4 lambColor = Color * max(0, dot(input.Normal, normalize(lightVector)));
+		float4 diffColor = DiffuseColor * max(0, dot(input.Normal, normalize(lightVector)));
 		//ambientcolor calculation (2.2)
 		float4 ambColor = AmbientColor * AmbientIntensity;
 
-		return lambColor + ambColor;
+		return diffColor + ambColor;
 }
 
 // PhongLighting implementation
@@ -104,7 +103,7 @@ float4 PhongLighting(VertexShaderOutput input)
 	Normal = normalize(Normal);
 
 	//lambertian calculation (2.1)
-	float4 lambColor = Color * max(0, dot(Normal, normalize(lightVector)));
+	float4 diffColor = DiffuseColor * max(0, dot(Normal, normalize(lightVector)));
 		//ambientcolor calculation (2.2)
 		float4 ambColor = AmbientColor * AmbientIntensity;
 		//specular calculation (2.3)
@@ -112,7 +111,7 @@ float4 PhongLighting(VertexShaderOutput input)
 		//viewVector.w = 0;
 		float4 halfVector = normalize(lightVector + viewVector);
 		float4 specColor = SpecularColor * (SpecularIntensity * pow(saturate(dot(Normal, halfVector)), SpecularPower));
-		return lambColor + ambColor + specColor;
+		return diffColor + ambColor + specColor;
 }
 
 //---------------------------------------- Technique: Simple ----------------------------------------
@@ -133,7 +132,6 @@ VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
 	output.Normal = input.Normal3D;
 
 	//1.2 Checkerboard pattern (add pixel coordinates)
-	output.Coordinate = input.Position3D.xy;
 	output.Position3D = input.Position3D;
 
 	return output;
