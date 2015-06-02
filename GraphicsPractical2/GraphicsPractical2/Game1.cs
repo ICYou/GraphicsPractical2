@@ -168,7 +168,7 @@ namespace GraphicsPractical2
             TextureEffect.Parameters["World"].SetValue(this.quadTransform);
             TextureEffect.CurrentTechnique = TextureEffect.Techniques["TextureTechnique"];
             this.camera.SetEffectParameters(TextureEffect);
-
+            
             foreach (EffectPass pass in TextureEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();

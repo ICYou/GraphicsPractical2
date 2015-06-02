@@ -68,7 +68,7 @@ float4 ProceduralColor(VertexShaderOutput input)
 	float X = input.Position3D.x;
 	float Y = input.Position3D.y;
 
-	//Comment
+	//Avoid mirroring on the negative axis.
 	if (X < 0)
 		X--;
 	if (Y < 0)
@@ -97,6 +97,7 @@ float4 LambertianLighting(VertexShaderOutput input)
 	
 		//lambertian calculation (2.1)
 		float4 diffColor = DiffuseColor * max(0, saturate(dot(input.Normal, normalize(PointLight - normal))));
+		
 		//ambientcolor calculation (2.2)
 		float4 ambColor = AmbientColor * AmbientIntensity;
 
@@ -122,11 +123,6 @@ float4 PhongLighting(VertexShaderOutput input)
 		return diffColor + ambColor + specColor;
 }
 
-//Texture
-float4 TextureColor(VertexShaderOutput input)
-{
-	return tex2D(TextureSampler, input.TextureCoordinate);
-}
 //---------------------------------------- Technique: Simple ----------------------------------------
 
 VertexShaderOutput SimpleVertexShader(VertexShaderInput input)
@@ -158,6 +154,15 @@ float4 SimplePixelShader(VertexShaderOutput input) : COLOR0
 	return color;
 }
 
+technique Simple
+{
+	pass Pass0
+	{
+		VertexShader = compile vs_2_0 SimpleVertexShader();
+		PixelShader = compile ps_2_0 SimplePixelShader();
+	}
+}
+
 //---------------------------------------- Technique: TextureTechnique ----------------------------------------
 VertexShaderOutput TextureVertexShader(VertexShaderInput input)
 {
@@ -176,6 +181,12 @@ VertexShaderOutput TextureVertexShader(VertexShaderInput input)
 	return output;
 }
 
+//Texture
+float4 TextureColor(VertexShaderOutput input)
+{
+	return tex2D(TextureSampler, input.TextureCoordinate);
+}
+
 float4 TexturePixelShader(VertexShaderOutput input) : COLOR0
 {	
 	float4 color = TextureColor(input);
@@ -183,14 +194,7 @@ float4 TexturePixelShader(VertexShaderOutput input) : COLOR0
 	return color;
 }
 
-technique Simple
-{
-	pass Pass0
-	{
-		VertexShader = compile vs_2_0 SimpleVertexShader();
-		PixelShader = compile ps_2_0 SimplePixelShader();
-	}
-}
+
 technique TextureTechnique
 {
 	pass Pass0
