@@ -143,6 +143,8 @@ namespace GraphicsPractical2
             // Matrices for 3D perspective projection
             this.camera.SetEffectParameters(effect);
 
+            Matrix World = Matrix.CreateScale(10.0f);
+
             Matrix InversedTransposedWorld = Matrix.Invert(Matrix.Transpose(World));
             
             effect.Parameters["World"].SetValue(World);
