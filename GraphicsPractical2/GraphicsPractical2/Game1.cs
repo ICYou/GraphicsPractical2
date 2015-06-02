@@ -142,8 +142,12 @@ namespace GraphicsPractical2
             effect.CurrentTechnique = effect.Techniques["Simple"];
             // Matrices for 3D perspective projection
             this.camera.SetEffectParameters(effect);
-            effect.Parameters["World"].SetValue(Matrix.Identity);
-            effect.Parameters["World"].SetValue(Matrix.CreateScale(10.0f));
+
+            Matrix World = Matrix.CreateScale(10.0f,6.5f,2.5f);
+            Matrix InversedTransposedWorld = Matrix.Invert(Matrix.Transpose(World));
+            
+            effect.Parameters["World"].SetValue(World);
+            effect.Parameters["InversedTransposedWorld"].SetValue(InversedTransposedWorld);
             // Draw the model
             mesh.Draw();
 
